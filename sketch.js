@@ -1,5 +1,5 @@
-var cols = 50;
-var rows = 50;
+var cols = 25;
+var rows = 25;
 
 var grid = new Array(rows);
 
@@ -10,6 +10,7 @@ var w, h;
 
 var openSet = [];
 var closedSet = [];
+var path = [];
 
 function Spot(i, j) {
     this.i = i;
@@ -94,6 +95,16 @@ function draw() {
         var current = openSet[lowestSet];
 
         if (current === end) {
+            // Now find the path.
+            path = [];
+
+            var temp = current;
+            while (temp.previous) {
+                path.push(temp.previous);
+                temp = temp.previous;
+            }
+
+            noLoop();
             console.log("Done !");
         }
 
@@ -139,5 +150,8 @@ function draw() {
 
     for (var i = 0; i < openSet.length; ++i)
         openSet[i].show(color(0, 255, 0));
+
+    for (var i = 0; i < path.length; ++i)
+        path[i].show(color(0, 0, 225));
 
 }
