@@ -34,7 +34,7 @@ function Spot(i, j) {
             fill(0);
         }
         noStroke(0);
-        rect(this.i * w, this.j * h, w - 1, h - 1);
+        ellipse(this.i * w + w / 2, this.j * h + h / 2, w / 2, h / 2);
     }
 
     this.addNeighbours = function (grid) {
@@ -168,7 +168,7 @@ function draw() {
         return;
     }
 
-    background(0);
+    background(255);
 
     for (let i = 0; i < rows; ++i)
         for (let j = 0; j < cols; ++j)
@@ -188,7 +188,14 @@ function draw() {
         path.push(temp.previous);
         temp = temp.previous;
     }
+
+
+
+    noFill();
+    stroke(255,13,90);
+    beginShape();
     for (var i = 0; i < path.length; ++i)
-        path[i].show(color(0, 0, 225));
+        vertex(path[i].i * w, path[i].j * h);
+    endShape();
 
 }
