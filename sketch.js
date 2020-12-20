@@ -20,10 +20,18 @@ function Spot(i, j) {
     this.h = 0;
     this.previous = undefined;
     this.neighbours = [];
+    this.wall = false;
+
+    if (random(1) < 0.3) {
+        this.wall = true;
+    }
 
     this.show = function (col) {
         fill(col);
-        stroke(0);
+        if (this.wall) {
+            fill(0);
+        }
+        noStroke(0);
         rect(this.i * w, this.j * h, w - 1, h - 1);
     }
 
@@ -68,6 +76,9 @@ function setup() {
     start = grid[0][0];
     end = grid[rows - 1][cols - 1];
 
+    start.wall = false;
+    end.wall = false;
+
     openSet.push(start);
 
     console.log(grid);
@@ -96,13 +107,7 @@ function draw() {
 
         if (current === end) {
             // Now find the path.
-            path = [];
 
-            var temp = current;
-            while (temp.previous) {
-                path.push(temp.previous);
-                temp = temp.previous;
-            }
 
             noLoop();
             console.log("Done !");
@@ -114,7 +119,7 @@ function draw() {
         var neighbours = current.neighbours;
         for (let i = 0; i < neighbours.length; ++i) {
             var neighbour = neighbours[i];
-            if (!closedSet.includes(neighbour)) {
+            if (!closedSet.includes(neighbour) && !neighbour.wall) {
                 var tempG = current.g + 1;
                 if (openSet.includes(neighbour)) {
                     if (tempG < neighbour.g) {
@@ -150,6 +155,14 @@ function draw() {
 
     for (var i = 0; i < openSet.length; ++i)
         openSet[i].show(color(0, 255, 0));
+
+    path = [];
+
+    var temp = current;
+    while (temp.previous) {
+        path.push(temp.previous);
+        temp = temp.previous;
+    }
 
     for (var i = 0; i < path.length; ++i)
         path[i].show(color(0, 0, 225));
