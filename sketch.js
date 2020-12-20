@@ -1,5 +1,5 @@
-var cols = 25;
-var rows = 25;
+var cols = 50;
+var rows = 50;
 
 var grid = new Array(rows);
 
@@ -12,6 +12,8 @@ var openSet = [];
 var closedSet = [];
 var path = [];
 
+var noSolution = false;
+
 function Spot(i, j) {
     this.i = i;
     this.j = j;
@@ -22,7 +24,7 @@ function Spot(i, j) {
     this.neighbours = [];
     this.wall = false;
 
-    if (random(1) < 0.3) {
+    if (random(1) < 0.4) {
         this.wall = true;
     }
 
@@ -49,6 +51,19 @@ function Spot(i, j) {
         }
         if (j > 0) {
             this.neighbours.push(grid[i][j - 1]);
+        }
+        // Diagonals.
+        if (i > 0 && j > 0) {
+            this.neighbours.push(grid[i - 1][j - 1]);
+        }
+        if (i < rows - 1 && j < cols - 1) {
+            this.neighbours.push(grid[i + 1][j + 1]);
+        }
+        if (i > 0 && j < cols - 1) {
+            this.neighbours.push(grid[i - 1][j + 1]);
+        }
+        if (i < rows - 1 && j > 0) {
+            this.neighbours.push(grid[i + 1][j - 1]);
         }
     }
 }
@@ -91,7 +106,7 @@ function removeFromArray(arr, elt) {
 }
 
 function heuristic(a, b) {
-    return dist(a.i, a.j, b.i, b.j);
+    return dist(a.i, a.j, b.i, b.j) + abs(a.j - b.j);
 }
 
 function draw() {
@@ -121,27 +136,36 @@ function draw() {
             var neighbour = neighbours[i];
             if (!closedSet.includes(neighbour) && !neighbour.wall) {
                 var tempG = current.g + 1;
+
+                var newPath = false;
                 if (openSet.includes(neighbour)) {
                     if (tempG < neighbour.g) {
                         neighbour.g = tempG;
+                        newPath = true;
                     }
                 } else {
                     neighbour.g = tempG;
+                    newPath = true;
                     openSet.push(neighbour);
                 }
 
-                neighbour.h = heuristic(neighbour, end)
 
-                neighbour.f = neighbour.g + neighbour.h;
+                if (newPath) {
+                    neighbour.h = heuristic(neighbour, end)
 
-                neighbour.previous = current;
+                    neighbour.f = neighbour.g + neighbour.h;
 
+                    neighbour.previous = current;
+                }
             }
 
         }
 
     } else {
         // No Solution.
+        console.log("No Solution!!");
+        noLoop();
+        return;
     }
 
     background(0);
@@ -156,6 +180,7 @@ function draw() {
     for (var i = 0; i < openSet.length; ++i)
         openSet[i].show(color(0, 255, 0));
 
+
     path = [];
 
     var temp = current;
@@ -163,7 +188,6 @@ function draw() {
         path.push(temp.previous);
         temp = temp.previous;
     }
-
     for (var i = 0; i < path.length; ++i)
         path[i].show(color(0, 0, 225));
 
