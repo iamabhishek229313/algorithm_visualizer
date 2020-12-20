@@ -1,7 +1,22 @@
-var cols = 50;
-var rows = 50;
+var rows;
+var cols;
 
-var grid = new Array(rows);
+var grid;
+
+var startSetup = false;
+
+function startEngine() {
+    let rCount = document.getElementById("rCount");
+    let cCount = document.getElementById("cCount");
+    console.log("R :" + rCount.value + "C : " + cCount.value);
+    rows = rCount.value;
+    cols = cCount.value;
+    grid = new Array(rows);
+    startSetup = true;
+    loop();
+}
+
+
 
 var start;
 var end;
@@ -12,7 +27,6 @@ var openSet = [];
 var closedSet = [];
 var path = [];
 
-var noSolution = false;
 
 function Spot(i, j) {
     this.i = i;
@@ -68,6 +82,8 @@ function Spot(i, j) {
     }
 }
 
+
+if(startSetup)
 function setup() {
     createCanvas(400, 400);
     console.log('A*');
@@ -109,6 +125,7 @@ function heuristic(a, b) {
     return dist(a.i, a.j, b.i, b.j) + abs(a.j - b.j);
 }
 
+if(startSetup)
 function draw() {
     if (openSet.length > 0) {
         let lowestSet = 0;
@@ -192,7 +209,7 @@ function draw() {
 
 
     noFill();
-    stroke(255,13,90);
+    stroke(255, 13, 90);
     beginShape();
     for (var i = 0; i < path.length; ++i)
         vertex(path[i].i * w, path[i].j * h);

@@ -6,19 +6,18 @@
     <script language="javascript" type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.min.js"></script>
     <script language="javascript" type="text/javascript" src="sketch.js"></script>
-    <script language="javascript" type="text/javascript" src="spot.js"></script>
     <title>Algorithm Visualizer</title>
 </head>
 
 <body>
     </h1 align="center"> Algorithm Visualizer </h1>
-    <form action="">
-        <label for="fname">Number of Rows:</label><br>
-        <input type="number" id="fname" name="fname" value=100><br>
+    <div>
+        <label for="rCount">Number of Rows:</label><br>
+        <input type="number" id="rCount" name="fname" value=100><br>
         <label for="lname">Number of Columns:</label><br>
-        <input type="number" id="lname" name="lname" value=100><br><br>
-        <input type="submit" value="Start">
-    </form>
+        <input type="number" id="cCount" name="lname" value=100><br><br>
+        <input type="submit" value="start" onclick="startEngine()">
+    </div>
 </body>
 
 </html>
