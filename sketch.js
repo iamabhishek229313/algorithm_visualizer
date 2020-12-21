@@ -1,20 +1,11 @@
-var rows;
-var cols;
+// Initial Value
+var rows = 10;
+var cols = 10;
 
 var grid;
 
-var startSetup = false;
+var isStarted = false;
 
-function startEngine() {
-    let rCount = document.getElementById("rCount");
-    let cCount = document.getElementById("cCount");
-    console.log("R :" + rCount.value + "C : " + cCount.value);
-    rows = rCount.value;
-    cols = cCount.value;
-    grid = new Array(rows);
-    startSetup = true;
-    loop();
-}
 
 
 
@@ -28,6 +19,50 @@ var closedSet = [];
 var path = [];
 
 
+
+function startEngine() {
+    let mnCount = document.getElementById("mnCount");
+    rows = mnCount.value;
+    cols = mnCount.value;
+    init();
+    isStarted = true;
+    loop();
+}
+
+function init() {
+    openSet = [];
+    closedSet = [];
+    path = [];
+    grid = new Array(rows);
+
+    w = width / cols;
+    h = height / rows;
+
+    for (let i = 0; i < rows; ++i) {
+        grid[i] = new Array(cols);
+    }
+
+    for (let i = 0; i < rows; ++i)
+        for (let j = 0; j < cols; ++j)
+            grid[i][j] = new Spot(i, j);
+
+    for (let i = 0; i < rows; ++i)
+        for (let j = 0; j < cols; ++j)
+            grid[i][j].addNeighbours(grid);
+
+    // Top left to bottom right.
+    start = grid[0][0];
+    end = grid[rows - 1][cols - 1];
+
+    start.wall = false;
+    end.wall = false;
+
+    openSet.push(start);
+
+    console.log(grid);
+}
+
+
 function Spot(i, j) {
     this.i = i;
     this.j = j;
@@ -38,7 +73,7 @@ function Spot(i, j) {
     this.neighbours = [];
     this.wall = false;
 
-    if (random(1) < 0.4) {
+    if (random(1) < 0.2) {
         this.wall = true;
     }
 
@@ -83,36 +118,10 @@ function Spot(i, j) {
 }
 
 
-if(startSetup)
 function setup() {
-    createCanvas(400, 400);
+    createCanvas(window.innerWidth - 10.0, window.innerHeight - 100);
     console.log('A*');
-
-    w = width / cols;
-    h = height / rows;
-
-    for (let i = 0; i < rows; ++i) {
-        grid[i] = new Array(cols);
-    }
-
-    for (let i = 0; i < rows; ++i)
-        for (let j = 0; j < cols; ++j)
-            grid[i][j] = new Spot(i, j);
-
-    for (let i = 0; i < rows; ++i)
-        for (let j = 0; j < cols; ++j)
-            grid[i][j].addNeighbours(grid);
-
-    // Top left to bottom right.
-    start = grid[0][0];
-    end = grid[rows - 1][cols - 1];
-
-    start.wall = false;
-    end.wall = false;
-
-    openSet.push(start);
-
-    console.log(grid);
+    init();
 }
 
 function removeFromArray(arr, elt) {
@@ -125,94 +134,104 @@ function heuristic(a, b) {
     return dist(a.i, a.j, b.i, b.j) + abs(a.j - b.j);
 }
 
-if(startSetup)
 function draw() {
-    if (openSet.length > 0) {
-        let lowestSet = 0;
-        for (var i = 0; i < openSet.length; ++i) {
-            if (openSet[i].f < openSet[lowestSet].f) {
-                lowestSet = i;
+    if (isStarted) {
+        if (openSet.length > 0) {
+            let lowestSet = 0;
+            for (var i = 0; i < openSet.length; ++i) {
+                if (openSet[i].f < openSet[lowestSet].f) {
+                    lowestSet = i;
+                }
             }
-        }
 
-        var current = openSet[lowestSet];
+            var current = openSet[lowestSet];
 
-        if (current === end) {
-            // Now find the path.
+            if (current === end) {
+                // Now find the path.
+                noLoop();
+                console.log("Done !");
+                isStarted = false;
+            }
 
+            removeFromArray(openSet, current);
+            closedSet.push(current);
 
-            noLoop();
-            console.log("Done !");
-        }
+            var neighbours = current.neighbours;
+            for (let i = 0; i < neighbours.length; ++i) {
+                var neighbour = neighbours[i];
+                if (!closedSet.includes(neighbour) && !neighbour.wall) {
+                    var tempG = current.g + 1;
 
-        removeFromArray(openSet, current);
-        closedSet.push(current);
-
-        var neighbours = current.neighbours;
-        for (let i = 0; i < neighbours.length; ++i) {
-            var neighbour = neighbours[i];
-            if (!closedSet.includes(neighbour) && !neighbour.wall) {
-                var tempG = current.g + 1;
-
-                var newPath = false;
-                if (openSet.includes(neighbour)) {
-                    if (tempG < neighbour.g) {
+                    var newPath = false;
+                    if (openSet.includes(neighbour)) {
+                        if (tempG < neighbour.g) {
+                            neighbour.g = tempG;
+                            newPath = true;
+                        }
+                    } else {
                         neighbour.g = tempG;
                         newPath = true;
+                        openSet.push(neighbour);
                     }
-                } else {
-                    neighbour.g = tempG;
-                    newPath = true;
-                    openSet.push(neighbour);
+
+
+                    if (newPath) {
+                        neighbour.h = heuristic(neighbour, end)
+
+                        neighbour.f = neighbour.g + neighbour.h;
+
+                        neighbour.previous = current;
+                    }
                 }
 
-
-                if (newPath) {
-                    neighbour.h = heuristic(neighbour, end)
-
-                    neighbour.f = neighbour.g + neighbour.h;
-
-                    neighbour.previous = current;
-                }
             }
 
+        } else {
+            // No Solution.
+            console.log("No Solution!!");
+            alert("No Solution!!");
+            isStarted = false;
+            noLoop();
+            return;
         }
 
-    } else {
-        // No Solution.
-        console.log("No Solution!!");
-        noLoop();
-        return;
+        background(255);
+
+        for (let i = 0; i < rows; ++i)
+            for (let j = 0; j < cols; ++j)
+                grid[i][j].show(255);
+
+        for (var i = 0; i < closedSet.length; ++i)
+            closedSet[i].show(color(255, 0, 0));
+
+        for (var i = 0; i < openSet.length; ++i)
+            openSet[i].show(color(0, 255, 0));
+
+
+        path = [];
+
+        var temp = current;
+        while (temp.previous) {
+            path.push(temp.previous);
+            temp = temp.previous;
+        }
+
+
+
+        noFill();
+        strokeWeight(3);
+        stroke(255, 13, 90);
+        beginShape();
+        for (var i = 0; i < path.length; ++i)
+            vertex(path[i].i * w, path[i].j * h);
+        endShape();
     }
 
-    background(255);
+    rectangle();
+}
 
-    for (let i = 0; i < rows; ++i)
-        for (let j = 0; j < cols; ++j)
-            grid[i][j].show(255);
-
-    for (var i = 0; i < closedSet.length; ++i)
-        closedSet[i].show(color(255, 0, 0));
-
-    for (var i = 0; i < openSet.length; ++i)
-        openSet[i].show(color(0, 255, 0));
-
-
-    path = [];
-
-    var temp = current;
-    while (temp.previous) {
-        path.push(temp.previous);
-        temp = temp.previous;
-    }
-
-
-
-    noFill();
-    stroke(255, 13, 90);
-    beginShape();
-    for (var i = 0; i < path.length; ++i)
-        vertex(path[i].i * w, path[i].j * h);
-    endShape();
-
+function rectangle() {
+    stroke(255);
+    fill(255, 255, 255, 100);
+    rect(70, 70, 60, 60, 10);
 }
